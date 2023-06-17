@@ -248,7 +248,7 @@ T moveLeft(T t) { return move(t, sf::Vector2f(-1, 0)); }
 T moveRight(T t) { return move(t, sf::Vector2f(1, 0)); }
 T moveDown(T t) { return move(t, sf::Vector2f(0, 1)); }
 
-T update(T t) {
+T update(T t, bool shouldAutomaticallyFall) {
     Piece::T current = t.piece;
     Piece::T newPiece = Piece::copyWithOffset(t.piece, sf::Vector2f(0, 1));
 
@@ -257,21 +257,60 @@ T update(T t) {
         t.piece = Piece::reset(current);
         // remove full lines
     } else {
-        t.piece = newPiece;
+        if (shouldAutomaticallyFall) {
+            t.piece = newPiece;
+        }
+    }
+
+    return t;
+}
+
+T movePiece(T t, sf::Keyboard::Key key, float *accumulatedFramesBeforeMove,
+            float *accumulatedFramesBeforeFall) {
+    if (key == sf::Keyboard::Left) {
+        t = State::moveLeft(t);
+        *accumulatedFramesBeforeMove = 0.0f;
+    } else if (key == sf::Keyboard::Right) {
+        t = State::moveRight(t);
+        *accumulatedFramesBeforeMove = 0.0f;
+    } else if (key == sf::Keyboard::Down) {
+        t = State::moveDown(t);
+        *accumulatedFramesBeforeMove = 0.0f;
+        *accumulatedFramesBeforeFall = 0.0f;
     }
 
     return t;
 }
 }  // namespace State
 
-struct TetrisPiece {
-    std::vector<sf::RectangleShape> blocks;
+namespace Keys {
+struct T {
+    std::unordered_set<sf::Keyboard::Key> pressed;
 };
+
+bool isPressed(const T &t, sf::Keyboard::Key key) {
+    return t.pressed.count(key) > 0;
+}
+
+void addPressed(T &t, sf::Keyboard::Key key) {
+    t.pressed.emplace(key);
+    return;
+}
+
+void removePressed(T &t, sf::Keyboard::Key key) {
+    t.pressed.erase(key);
+    return;
+}
+
+}  // namespace Keys
 
 constexpr float FixedNumberOfFrames = 60.0f;
 constexpr float FixedTimeStep = 1.0f / FixedNumberOfFrames;
-constexpr float speed = 5.0f;
+constexpr float speed = 3.0f;
 constexpr float FramesBeforeFall = FixedNumberOfFrames / speed;
+
+// If you keep the key pressed, it will move the piece 2.0f times per update
+constexpr float FramesBeforeMovement = FramesBeforeFall / 2.0f;
 
 int main() {
     constexpr float window_width = (NUMCOLS + 2 * OFFSET_GRID) * SQUARESIZE;
@@ -282,19 +321,15 @@ int main() {
     State::T state = State::init();
 
     sf::Clock clock;
-    float deltaTime = 0.0f;
+
     float accumulatedTime = 0.0f;
+    float accumulatedFramesBeforeMove = 0.0f;
     float accumulatedFramesBeforeFall = 0.0f;
-    std::unordered_set<sf::Keyboard::Key> pressedKeys;
-    auto isPressed = [&pressedKeys](sf::Keyboard::Key key) {
-        return pressedKeys.count(key) > 0;
-    };
-    auto addPressedKey = [&pressedKeys](sf::Keyboard::Key key) {
-        return pressedKeys.insert(key);
-    };
-    auto removePressedKey = [&pressedKeys](sf::Keyboard::Key key) {
-        return pressedKeys.erase(key);
-    };
+    float accumulatedFramesBeforeUpdate = 0.0f;
+
+    Keys::T keys;
+
+    std::vector<sf::Keyboard::Key> shouldBeReleased;
 
     while (window.isOpen()) {
         sf::Event event;
@@ -302,45 +337,51 @@ int main() {
             if (event.type == sf::Event::Closed) window.close();
 
             if (event.type == sf::Event::KeyPressed) {
-                if (isPressed(event.key.code)) {
+                if (Keys::isPressed(keys, event.key.code)) {
                     continue;
                 }
 
-                if (event.key.code == sf::Keyboard::Left) {
-                    state = State::moveLeft(state);
-                } else if (event.key.code == sf::Keyboard::Right) {
-                    state = State::moveRight(state);
-                } else if (event.key.code == sf::Keyboard::Down) {
-                    state = State::moveDown(state);
-                } else if (event.key.code == sf::Keyboard::Space) {
+                auto key = event.key.code;
+
+                state =
+                    State::movePiece(state, key, &accumulatedFramesBeforeMove,
+                                     &accumulatedFramesBeforeFall);
+
+                if (key == sf::Keyboard::Space) {
                 }
 
-                addPressedKey(event.key.code);
+                Keys::addPressed(keys, key);
             }
 
             if (event.type == sf::Event::KeyReleased) {
-                /* if (isPressed(event.key.code)) { */
-                removePressedKey(event.key.code);
-                /* } */
+                shouldBeReleased.push_back(event.key.code);
             }
         }
 
         window.clear(COLOR_BACKGROUND);
 
-        deltaTime = clock.restart().asSeconds();
-        accumulatedTime += deltaTime;
-
+        accumulatedTime += clock.restart().asSeconds();
         while (accumulatedTime >= FixedTimeStep) {
+            accumulatedFramesBeforeMove += 1.0f;
             accumulatedFramesBeforeFall += 1.0f;
+            accumulatedFramesBeforeUpdate += 1.0f;
 
-            // Good idea but currently does not work
-            /* if (accumulatedFramesBeforeFall >= FramesBeforeFall / 2) { */
-            /*     pressedKeys.clear(); */
-            /* } */
+            if (accumulatedFramesBeforeMove >= FramesBeforeMovement) {
+                for (const auto &key : keys.pressed) {
+                    state = State::movePiece(state, key,
+                                             &accumulatedFramesBeforeMove,
+                                             &accumulatedFramesBeforeFall);
+                }
+            }
 
-            if (accumulatedFramesBeforeFall >= FramesBeforeFall) {
-                state = State::update(state);
-                accumulatedFramesBeforeFall = 0.0f;
+            if (accumulatedFramesBeforeUpdate >= FramesBeforeFall) {
+                bool shouldAutomaticallyFall =
+                    accumulatedFramesBeforeFall >= FramesBeforeFall;
+                state = State::update(state, shouldAutomaticallyFall);
+                if (shouldAutomaticallyFall) {
+                    accumulatedFramesBeforeFall = 0.0f;
+                }
+                accumulatedFramesBeforeUpdate = 0.0f;
             }
 
             accumulatedTime -= FixedTimeStep;
@@ -349,6 +390,11 @@ int main() {
         State::draw(state, window);
 
         window.display();
+
+        for (const auto &key : shouldBeReleased) {
+            Keys::removePressed(keys, key);
+        }
+        shouldBeReleased.clear();
     }
 
     return 0;
