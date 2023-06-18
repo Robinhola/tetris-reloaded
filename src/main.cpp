@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <random>
 #include <unordered_set>
 
 // Define the size of each square in the grid
@@ -109,48 +110,237 @@ struct T {
     sf::Vector2f origin;
     sf::Vector2f position;
     std::vector<sf::RectangleShape> blocks;
+    std::mt19937 gen;                                 // Seed the generator
+    std::uniform_int_distribution<int> distribution;  // Define the range
 };
 
 sf::Color color(int type) {
     switch (type) {
         case 1:
             return sf::Color::Red;
+        case 2:
+            return sf::Color::Red;
+        case 3:
+            return sf::Color::Red;
+        case 4:
+            return sf::Color::Red;
+        case 5:
+            return sf::Color::Red;
+        case 6:
+            return sf::Color::Red;
+        case 7:
+            return sf::Color::Red;
         default:
-            return sf::Color::White;
+            std::cout << "Error: no color defined for type " << type
+                      << std::endl;
+            return sf::Color::Black;
     }
 }
 
-std::vector<sf::RectangleShape> blocks(int type, sf::Vector2f origin,
+std::vector<sf::RectangleShape> blocks(int type, int rotation,
+                                       sf::Vector2f origin,
                                        sf::Vector2f position) {
+    /* std::cout << "Debug blocks: type=" << type << " rotation=" << rotation */
+    /*           << std::endl; */
+
     std::vector<sf::RectangleShape> blocks;
+
+    const float x = (origin.x + position.x) * SQUARESIZE;
+    const float y = (origin.y + position.y) * SQUARESIZE;
+
+    auto translate = [x, y](float xr, float yr) {
+        xr = xr * SQUARESIZE + x;
+        yr = yr * SQUARESIZE + y;
+        return sf::Vector2f(xr, yr);
+    };
+
+    sf::RectangleShape block0(sf::Vector2f(0, 0));
+    sf::RectangleShape block1(sf::Vector2f(0, 0));
+    sf::RectangleShape block2(sf::Vector2f(0, 0));
+    sf::RectangleShape block3(sf::Vector2f(0, 0));
+
     switch (type) {
         case 1: {
-            float x = (origin.x + position.x) * SQUARESIZE;
-            float y = (origin.y + position.y) * SQUARESIZE;
-
-            sf::RectangleShape block1(sf::Vector2f(0, 0));
-            sf::RectangleShape block2(sf::Vector2f(0, 0));
-            sf::RectangleShape block3(sf::Vector2f(0, 0));
-            sf::RectangleShape block4(sf::Vector2f(0, 0));
-
-            block1.setPosition(sf::Vector2f(x + 0. * SQUARESIZE, y));
-            block2.setPosition(sf::Vector2f(x + 1. * SQUARESIZE, y));
-            block3.setPosition(sf::Vector2f(x + 2. * SQUARESIZE, y));
-            block4.setPosition(sf::Vector2f(x + 3. * SQUARESIZE, y));
-
-            blocks.push_back(block1);
-            blocks.push_back(block2);
-            blocks.push_back(block3);
-            blocks.push_back(block4);
-
+            // Line: 0123
+            switch (rotation) {
+                case 1:
+                case 3:
+                    block0.setPosition(translate(-2., 0.));
+                    block1.setPosition(translate(-1., 0.));
+                    block2.setPosition(translate(+0., 0.));
+                    block3.setPosition(translate(+1., 0.));
+                    break;
+                case 2:
+                case 4:
+                    block0.setPosition(translate(0., -2.));
+                    block1.setPosition(translate(0., -1.));
+                    block2.setPosition(translate(0., +0.));
+                    block3.setPosition(translate(0., +1.));
+                    break;
+            }
+            break;
+        }
+        case 2: {
+            // Square: 0 1
+            //         2 3
+            switch (rotation) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    block0.setPosition(translate(0., 0.));
+                    block1.setPosition(translate(1., 0.));
+                    block2.setPosition(translate(0., 1.));
+                    block3.setPosition(translate(1., 1.));
+                    break;
+            }
+            break;
+        }
+        case 3: {
+            // 0 1 2
+            //     3
+            switch (rotation) {
+                case 1:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+1., +0.));
+                    block3.setPosition(translate(+1., +1.));
+                    break;
+                case 2:
+                    block0.setPosition(translate(+0., -1.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(-1., +1.));
+                    break;
+                case 3:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+1., +0.));
+                    block3.setPosition(translate(-1., -1.));
+                    break;
+                case 4:
+                    block0.setPosition(translate(+0., -1.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(+1., -1.));
+                    break;
+            }
+            break;
+        }
+        case 4: {
+            // 0 1 2
+            // 3
+            switch (rotation) {
+                case 1:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+1., +0.));
+                    block3.setPosition(translate(-1., +1.));
+                    break;
+                case 2:
+                    block0.setPosition(translate(+0., -1.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(-1., -1.));
+                    break;
+                case 3:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+1., +0.));
+                    block3.setPosition(translate(+1., -1.));
+                    break;
+                case 4:
+                    block0.setPosition(translate(+0., -1.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(+1., +1.));
+                    break;
+            }
+            break;
+        }
+        case 5: {
+            //   2 3
+            // 0 1
+            switch (rotation) {
+                case 1:
+                case 3:
+                    block0.setPosition(translate(-1., +1.));
+                    block1.setPosition(translate(+0., +1.));
+                    block2.setPosition(translate(+0., +0.));
+                    block3.setPosition(translate(+1., +0.));
+                    break;
+                case 2:
+                case 4:
+                    block0.setPosition(translate(-0., -1.));
+                    block1.setPosition(translate(+1., +0.));
+                    block2.setPosition(translate(+0., +0.));
+                    block3.setPosition(translate(+1., +1.));
+                    break;
+            }
+            break;
+        }
+        case 6: {
+            // 0 1 2
+            //   3
+            switch (rotation) {
+                case 1:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+1., +0.));
+                    block3.setPosition(translate(+0., +1.));
+                    break;
+                case 2:
+                    block0.setPosition(translate(+0., -1.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(-1., +0.));
+                    break;
+                case 3:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+1., +0.));
+                    block3.setPosition(translate(+0., -1.));
+                    break;
+                case 4:
+                    block0.setPosition(translate(+0., -1.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(+1., +0.));
+                    break;
+            }
+            break;
+        }
+        case 7: {
+            // 0 1
+            //   2 3
+            switch (rotation) {
+                case 1:
+                case 3:
+                    block0.setPosition(translate(-1., +0.));
+                    block1.setPosition(translate(+0., +0.));
+                    block2.setPosition(translate(+0., +1.));
+                    block3.setPosition(translate(+1., +1.));
+                    break;
+                case 2:
+                case 4:
+                    block0.setPosition(translate(+1., -1.));
+                    block1.setPosition(translate(+1., +0.));
+                    block2.setPosition(translate(+0., +0.));
+                    block3.setPosition(translate(+0., +1.));
+                    break;
+            }
             break;
         }
         default: {
-            sf::RectangleShape block(position);
-            blocks.push_back(block);
+            std::cout << "Error: undefined type: " << type << std::endl;
             break;
         }
     }
+    blocks.push_back(block0);
+    blocks.push_back(block1);
+    blocks.push_back(block2);
+    blocks.push_back(block3);
+
     sf::Color blockColor = color(type);
     for (auto &block : blocks) {
         block.setFillColor(blockColor);
@@ -165,13 +355,13 @@ T set(T t, int orientation, int type, sf::Vector2f position) {
     t.orientation = orientation;
     t.type = type;
     t.position = position;
-    t.blocks = blocks(type, t.origin, position);
+    t.blocks = blocks(type, orientation, t.origin, position);
     return t;
 }
 
 T reset(T t) {
-    int style = 1;
-    return set(t, 0, style, sf::Vector2f(NUMCOLS / 2.0f, 0));
+    int type = t.distribution(t.gen);
+    return set(t, 1, type, sf::Vector2f(NUMCOLS / 2.0f, 0));
 }
 
 T copyWithOffset(const T &t, sf::Vector2f offset) {
@@ -183,9 +373,26 @@ T copyWithOffset(const T &t, sf::Vector2f offset) {
     return set(copy, t.orientation, t.type, offsetPosition);
 }
 
+T copyWithRotation(const T &t, int offset) {
+    T copy = T(t);
+
+    int orientation = t.orientation + 1;
+    orientation = orientation > 4 ? 1 : orientation;
+
+    return set(copy, orientation, t.type, t.position);
+}
+
 T init(sf::Vector2f origin) {
+    std::random_device rd;   // Obtain a random seed from the hardware
+    std::mt19937 gen(rd());  // Seed the generator
+    std::uniform_int_distribution<int> distribution(1, 7);  // Define the range
+
     T t = T{};
+
     t.origin = origin;
+    t.gen = gen;
+    t.distribution = distribution;
+
     return t;
 }
 
@@ -211,7 +418,7 @@ T init() {
     Blocks::T blocks = Blocks::init(origin);
 
     Piece::T piece = Piece::init(origin);
-    piece = Piece::set(piece, 0, 1, sf::Vector2f(5, 2));
+    piece = Piece::set(piece, 1, 1, sf::Vector2f(5, 2));
 
     return T(grid, blocks, piece);
 }
@@ -235,6 +442,14 @@ bool isPieceColliding(T t, Piece::T piece) {
         }
     }
     return false;
+}
+
+T rotate(T t, bool positive) {
+    int offset = positive ? 1 : -1;
+    Piece::T current = t.piece;
+    Piece::T newPiece = Piece::copyWithRotation(t.piece, offset);
+    if (!isPieceColliding(t, newPiece)) t.piece = newPiece;
+    return t;
 }
 
 T move(T t, const sf::Vector2f &direction) {
@@ -286,20 +501,24 @@ T movePiece(T t, sf::Keyboard::Key key, float *accumulatedFramesBeforeMove,
 namespace Keys {
 struct T {
     std::unordered_set<sf::Keyboard::Key> pressed;
+    std::vector<sf::Keyboard::Key> toBeReleased;
 };
 
 bool isPressed(const T &t, sf::Keyboard::Key key) {
     return t.pressed.count(key) > 0;
 }
 
-void addPressed(T &t, sf::Keyboard::Key key) {
-    t.pressed.emplace(key);
-    return;
+void addPressed(T &t, sf::Keyboard::Key key) { t.pressed.emplace(key); }
+
+void toBeReleased(T &t, sf::Keyboard::Key key) {
+    t.toBeReleased.push_back(key);
 }
 
-void removePressed(T &t, sf::Keyboard::Key key) {
-    t.pressed.erase(key);
-    return;
+void removePressed(T &t) {
+    for (const auto &key : t.toBeReleased) {
+        t.pressed.erase(key);
+    }
+    t.toBeReleased.clear();
 }
 
 }  // namespace Keys
@@ -310,7 +529,7 @@ constexpr float speed = 3.0f;
 constexpr float FramesBeforeFall = FixedNumberOfFrames / speed;
 
 // If you keep the key pressed, it will move the piece 2.0f times per update
-constexpr float FramesBeforeMovement = FramesBeforeFall / 2.0f;
+constexpr float FramesBeforeMovement = FramesBeforeFall / 2.5f;
 
 int main() {
     constexpr float window_width = (NUMCOLS + 2 * OFFSET_GRID) * SQUARESIZE;
@@ -318,18 +537,17 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(window_width, window_height),
                             "Tetris (SFML rocks!)");
 
-    State::T state = State::init();
-
     sf::Clock clock;
 
     float accumulatedTime = 0.0f;
-    float accumulatedFramesBeforeMove = 0.0f;
     float accumulatedFramesBeforeFall = 0.0f;
+    float accumulatedFramesBeforeMove = 0.0f;
+    float accumulatedFramesBeforeRotation = 0.0f;
     float accumulatedFramesBeforeUpdate = 0.0f;
 
     Keys::T keys;
 
-    std::vector<sf::Keyboard::Key> shouldBeReleased;
+    State::T state = State::init();
 
     while (window.isOpen()) {
         sf::Event event;
@@ -337,24 +555,26 @@ int main() {
             if (event.type == sf::Event::Closed) window.close();
 
             if (event.type == sf::Event::KeyPressed) {
-                if (Keys::isPressed(keys, event.key.code)) {
-                    continue;
-                }
-
                 auto key = event.key.code;
 
-                state =
-                    State::movePiece(state, key, &accumulatedFramesBeforeMove,
-                                     &accumulatedFramesBeforeFall);
+                if (Keys::isPressed(keys, key)) continue;
+
+                auto moveAcc = &accumulatedFramesBeforeMove;
+                auto fallAcc = &accumulatedFramesBeforeFall;
 
                 if (key == sf::Keyboard::Space) {
+                    state = State::rotate(state, true);
+                    // We could something fun here
+                    /* accumulatedFramesBeforeFall = */
+                } else {
+                    state = State::movePiece(state, key, moveAcc, fallAcc);
                 }
 
                 Keys::addPressed(keys, key);
             }
 
             if (event.type == sf::Event::KeyReleased) {
-                shouldBeReleased.push_back(event.key.code);
+                Keys::toBeReleased(keys, event.key.code);
             }
         }
 
@@ -391,10 +611,7 @@ int main() {
 
         window.display();
 
-        for (const auto &key : shouldBeReleased) {
-            Keys::removePressed(keys, key);
-        }
-        shouldBeReleased.clear();
+        Keys::removePressed(keys);
     }
 
     return 0;
