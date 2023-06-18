@@ -114,14 +114,14 @@ struct T {
     std::uniform_int_distribution<int> distribution;  // Define the range
 };
 
-sf::Color color(int type) {
+sf::Color outlineColor(int type) {
     switch (type) {
         case 1:
             return sf::Color::Red;
         case 2:
             return sf::Color::Red;
         case 3:
-            return sf::Color::Red;
+            return sf::Color::Green;
         case 4:
             return sf::Color::Red;
         case 5:
@@ -129,7 +129,30 @@ sf::Color color(int type) {
         case 6:
             return sf::Color::Red;
         case 7:
+            return sf::Color::Green;
+        default:
+            std::cout << "Error: no color defined for type " << type
+                      << std::endl;
+            return sf::Color::Black;
+    }
+}
+
+sf::Color color(int type) {
+    switch (type) {
+        case 1:
             return sf::Color::Red;
+        case 2:
+            return sf::Color::Yellow;
+        case 3:
+            return sf::Color::Blue;
+        case 4:
+            return sf::Color::Black;
+        case 5:
+            return sf::Color::Magenta;
+        case 6:
+            return sf::Color::Cyan;
+        case 7:
+            return sf::Color::Green;
         default:
             std::cout << "Error: no color defined for type " << type
                       << std::endl;
@@ -341,12 +364,13 @@ std::vector<sf::RectangleShape> blocks(int type, int rotation,
     blocks.push_back(block2);
     blocks.push_back(block3);
 
+    sf::Color blockOutlineColor = color(type);
     sf::Color blockColor = color(type);
     for (auto &block : blocks) {
         block.setFillColor(blockColor);
         block.setSize(sf::Vector2f(SQUARESIZE, SQUARESIZE));
-        block.setOutlineThickness(1.0f);
-        block.setOutlineColor(COLOR_OUTLINE);
+        block.setOutlineThickness(0.5f);
+        block.setOutlineColor(blockOutlineColor);
     }
     return blocks;
 }
