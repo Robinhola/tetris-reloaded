@@ -12,7 +12,7 @@
 
 # =============================================================================
 # Project: Tetris-reloaded
-# Configurations: 
+# Configurations: Debug
 # =============================================================================
 
 #############################################
@@ -20,6 +20,11 @@
 
 ninja_required_version = 1.5
 
+
+#############################################
+# Set configuration variable for custom commands.
+
+CONFIGURATION = Debug
 # =============================================================================
 # Include auxiliary files.
 
@@ -44,9 +49,9 @@ cmake_ninja_workdir = /home/robin/Projects/Games-with-sfml/Tetris-reloaded/
 
 build cmake_object_order_depends_target_tetris.exe: phony || CMakeFiles/tetris.exe.dir
 
-build CMakeFiles/tetris.exe.dir/src/main.cpp.o: CXX_COMPILER__tetris.2eexe_ /home/robin/Projects/Games-with-sfml/Tetris-reloaded/src/main.cpp || cmake_object_order_depends_target_tetris.exe
+build CMakeFiles/tetris.exe.dir/src/main.cpp.o: CXX_COMPILER__tetris.2eexe_Debug /home/robin/Projects/Games-with-sfml/Tetris-reloaded/src/main.cpp || cmake_object_order_depends_target_tetris.exe
   DEP_FILE = CMakeFiles/tetris.exe.dir/src/main.cpp.o.d
-  FLAGS = -std=gnu++20
+  FLAGS = -g -std=gnu++20
   OBJECT_DIR = CMakeFiles/tetris.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/tetris.exe.dir/src
 
@@ -58,7 +63,8 @@ build CMakeFiles/tetris.exe.dir/src/main.cpp.o: CXX_COMPILER__tetris.2eexe_ /hom
 #############################################
 # Link the executable tetris.exe
 
-build tetris.exe: CXX_EXECUTABLE_LINKER__tetris.2eexe_ CMakeFiles/tetris.exe.dir/src/main.cpp.o | /usr/lib/x86_64-linux-gnu/libsfml-graphics.so.2.5.1 /usr/lib/x86_64-linux-gnu/libsfml-audio.so.2.5.1 /usr/lib/x86_64-linux-gnu/libsfml-window.so.2.5.1 /usr/lib/x86_64-linux-gnu/libsfml-system.so.2.5.1
+build tetris.exe: CXX_EXECUTABLE_LINKER__tetris.2eexe_Debug CMakeFiles/tetris.exe.dir/src/main.cpp.o | /usr/lib/x86_64-linux-gnu/libsfml-graphics.so.2.5.1 /usr/lib/x86_64-linux-gnu/libsfml-audio.so.2.5.1 /usr/lib/x86_64-linux-gnu/libsfml-window.so.2.5.1 /usr/lib/x86_64-linux-gnu/libsfml-system.so.2.5.1
+  FLAGS = -g
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libsfml-graphics.so.2.5.1  /usr/lib/x86_64-linux-gnu/libsfml-audio.so.2.5.1  /usr/lib/x86_64-linux-gnu/libsfml-window.so.2.5.1  /usr/lib/x86_64-linux-gnu/libsfml-system.so.2.5.1
   OBJECT_DIR = CMakeFiles/tetris.exe.dir
   POST_BUILD = :

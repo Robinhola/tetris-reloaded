@@ -163,9 +163,6 @@ sf::Color color(int type) {
 std::vector<sf::RectangleShape> blocks(int type, int rotation,
                                        sf::Vector2f origin,
                                        sf::Vector2f position) {
-    /* std::cout << "Debug blocks: type=" << type << " rotation=" << rotation */
-    /*           << std::endl; */
-
     std::vector<sf::RectangleShape> blocks;
 
     const float x = (origin.x + position.x) * SQUARESIZE;
@@ -487,6 +484,54 @@ T moveLeft(T t) { return move(t, sf::Vector2f(-1, 0)); }
 T moveRight(T t) { return move(t, sf::Vector2f(1, 0)); }
 T moveDown(T t) { return move(t, sf::Vector2f(0, 1)); }
 
+T removeFulllines(T t) {
+    auto &blocks = t.blocks.blocks;
+
+    std::sort(
+        blocks.begin(), blocks.end(),
+        [](const sf::RectangleShape &left, const sf::RectangleShape &right) {
+            return left.getPosition().y < right.getPosition().y;
+        });
+
+    // 0 indexed
+    int count[NUMROWS] = {};
+    for (const auto &block : blocks) {
+        // 1 indexed
+        int y = int(block.getPosition().y / SQUARESIZE);
+        count[y - 1] += 1;
+    }
+
+    int currentOffset = 0;
+    int numberOfTimesLinesShouldBeShifted[NUMROWS] = {};
+    for (int i = 0; i < NUMROWS; ++i) {
+        // Start from the end
+        // 0 indexed
+        int y = NUMROWS - i;
+        if (count[y] == NUMCOLS) {
+            currentOffset += 1;
+        }
+        numberOfTimesLinesShouldBeShifted[y] = currentOffset;
+    }
+
+    std::vector<sf::RectangleShape> shiftedBlocks;
+    for (auto block : blocks) {
+        // 1 indexed
+        int y = int(block.getPosition().y / SQUARESIZE);
+        if (count[y - 1] == NUMCOLS) {
+            continue;
+        }
+        block.setPosition(
+            block.getPosition().x,
+            block.getPosition().y +
+                numberOfTimesLinesShouldBeShifted[y] * SQUARESIZE);
+        shiftedBlocks.push_back(block);
+    }
+
+    t.blocks.blocks = shiftedBlocks;
+
+    return t;
+}
+
 T update(T t, bool shouldAutomaticallyFall) {
     Piece::T current = t.piece;
     Piece::T newPiece = Piece::copyWithOffset(t.piece, sf::Vector2f(0, 1));
@@ -494,7 +539,7 @@ T update(T t, bool shouldAutomaticallyFall) {
     if (isPieceColliding(t, newPiece)) {
         t.blocks = Blocks::addBlocks(t.blocks, current.blocks);
         t.piece = Piece::reset(current);
-        // remove full lines
+        t = removeFulllines(t);
     } else {
         if (shouldAutomaticallyFall) {
             t.piece = newPiece;
