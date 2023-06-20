@@ -114,29 +114,6 @@ struct T {
     std::uniform_int_distribution<int> distribution;  // Define the range
 };
 
-sf::Color outlineColor(int type) {
-    switch (type) {
-        case 1:
-            return sf::Color::Red;
-        case 2:
-            return sf::Color::Red;
-        case 3:
-            return sf::Color::Green;
-        case 4:
-            return sf::Color::Red;
-        case 5:
-            return sf::Color::Red;
-        case 6:
-            return sf::Color::Red;
-        case 7:
-            return sf::Color::Green;
-        default:
-            std::cout << "Error: no color defined for type " << type
-                      << std::endl;
-            return sf::Color::Black;
-    }
-}
-
 sf::Color color(int type) {
     switch (type) {
         case 1:
