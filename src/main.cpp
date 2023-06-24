@@ -418,7 +418,7 @@ T init() {
     Piece::T piece = Piece::init(origin);
     piece = Piece::set(piece, 1, 1, sf::Vector2f(5, 2));
 
-    return T(grid, blocks, piece);
+    return T{grid, blocks, piece};
 }
 
 void draw(T t, sf::RenderWindow &window) {
