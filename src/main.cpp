@@ -1,7 +1,10 @@
 #include "constants.h"
 #include "keys.h"
+#include "menu.h"
 #include "state.h"
+
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 // Data oriented programming
 
@@ -42,8 +45,36 @@ int main() {
 
   Keys::T keys;
   State::T state = State::init();
-
   float accumulatedTime = 0.0f;
+
+  Menu::T menu = Menu::init_main(
+      [&state, &window, &accumulatedTime, &clock](Menu::Item choice) {
+        if (holds_alternative<Menu::Single_choice>(choice)) {
+          auto single_choice = get<Menu::Single_choice>(choice);
+
+          if (single_choice.name == "Play") {
+            state.name = State::Name::PLAYING;
+            accumulatedTime = 0.f;
+            clock.restart();
+          } else if (single_choice.name == "Quit") {
+            window.close();
+          } else {
+            std::cerr << "Received invalid choice: " << single_choice.name
+                      << std::endl;
+            throw std::invalid_argument("invalid choice");
+          }
+
+        } else {
+          auto multiple_choice = get<Menu::Multiple_choice>(choice);
+          if (multiple_choice.name == "Speed") {
+
+          } else {
+            std::cerr << "Received invalid choice: " << multiple_choice.name
+                      << std::endl;
+            throw std::invalid_argument("invalid choice");
+          }
+        }
+      });
 
   while (window.isOpen()) {
     while (window.pollEvent(event)) {
@@ -56,7 +87,25 @@ int main() {
         if (Keys::isAlreadyPressed(keys, key)) {
           continue;
         }
-        state = State::manageKeyPressed(state, key, true);
+        if (state.name == State::Name::PLAYING) {
+          if (key == sf::Keyboard::Escape) {
+            state.name = State::Name::SHOWING_FIRST_MENU;
+          } else {
+            state = State::manageKeyPressed(state, key, true);
+          }
+        } else if (state.name == State::Name::SHOWING_FIRST_MENU) {
+          if (key == sf::Keyboard::Down) {
+            menu = Menu::selectDown(menu);
+          } else if (key == sf::Keyboard::Up) {
+            menu = Menu::selectUp(menu);
+          } else if (key == sf::Keyboard::Left) {
+            menu = Menu::selectLeft(menu);
+          } else if (key == sf::Keyboard::Right) {
+            menu = Menu::selectRight(menu);
+          } else if (key == sf::Keyboard::Enter) {
+            Menu::choose(menu);
+          }
+        }
         Keys::addPressed(keys, key);
       }
 
@@ -67,15 +116,21 @@ int main() {
 
     window.clear(COLOR_BACKGROUND);
 
-    accumulatedTime += clock.restart().asSeconds();
+    if (state.name == State::Name::PLAYING) {
+      accumulatedTime += clock.restart().asSeconds();
 
-    while (accumulatedTime >= fixedTimeStep) {
-      state = State::manageFixedStep(state, keys);
+      while (accumulatedTime >= fixedTimeStep) {
+        state = State::manageFixedStep(state, keys);
 
-      accumulatedTime -= fixedTimeStep;
+        accumulatedTime -= fixedTimeStep;
+      }
     }
 
     State::draw(state, window);
+
+    if (state.name == State::Name::SHOWING_FIRST_MENU) {
+      Menu::draw(menu, window);
+    }
 
     window.display();
 

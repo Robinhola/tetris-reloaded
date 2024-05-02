@@ -8,13 +8,40 @@
 #include <SFML/Graphics.hpp>
 
 namespace State {
+
+enum Name {
+  SHOWING_FIRST_MENU,
+  SHOWING_MENU,
+  PLAYING,
+  LOST,
+  WON,
+};
+
 struct T {
+  // show menu, select with keys and validate with enter
+  // make selected item blink with fixed step
+  // - Start
+  // - Difficulty
+
+  // Menu:
+  // - Resume
+  // - Restart
+  // - Change difficulty
+
+  // Lose progress warning
+
+  // Show score
+  // Show next piece
+
   Grid::T grid;
   Blocks::T blocks;
   Piece::T piece;
+
   float accumulatedFramesBeforeFall = 0.0f;
   float accumulatedFramesBeforeMove = 0.0f;
   float accumulatedFramesBeforeUpdate = 0.0f;
+
+  Name name = SHOWING_FIRST_MENU;
 };
 
 T init();

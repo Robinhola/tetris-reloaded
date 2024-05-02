@@ -3,7 +3,6 @@
 #include "grid.h"
 #include "keys.h"
 #include "piece.h"
-#include <iostream>
 #include <sfml/graphics.hpp>
 
 namespace State {

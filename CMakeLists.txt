@@ -16,6 +16,7 @@ add_executable(${exe}
     src/blocks.cpp
     src/grid.cpp
     src/keys.cpp
+    src/menu.cpp
     src/piece.cpp
     src/state.cpp
     # Add your other source files here
