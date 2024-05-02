@@ -25,11 +25,12 @@ struct T {
   string name;
   size_t selection;
   vector<Item> items;
-  function<void(Item choice)> handle_choice;
+  function<void(Item choice, float speed)> handle_choice;
   sf::RectangleShape background;
 };
 
-T init_main(function<void(Item choice)> handle_choice);
+T init_main(function<void(Item choice, float speed)> handle_choice);
+float getSpeed(T t);
 
 T selectUp(T t);
 T selectDown(T t);

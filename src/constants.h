@@ -19,11 +19,5 @@ const sf::Color COLOR_OUTLINE = sf::Color::Magenta;
 // Movement
 constexpr float fixedNumberOfFrames = 60.0f;
 constexpr float fixedTimeStep = 1.0f / fixedNumberOfFrames;
-constexpr float speed = 3.0f;
-
-constexpr float FramesBeforeFall = fixedNumberOfFrames / speed;
-
-// If you keep the key pressed, it will move the piece 2.0f times per update
-constexpr float FramesBeforeMovement = FramesBeforeFall / 2.5f;
 
 #endif // !CONSTANTS_H

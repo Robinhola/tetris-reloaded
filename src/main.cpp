@@ -3,6 +3,9 @@
 #include "menu.h"
 #include "state.h"
 
+#include "tetris_sound.h"
+
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
@@ -47,34 +50,47 @@ int main() {
   State::T state = State::init();
   float accumulatedTime = 0.0f;
 
-  Menu::T menu = Menu::init_main(
-      [&state, &window, &accumulatedTime, &clock](Menu::Item choice) {
-        if (holds_alternative<Menu::Single_choice>(choice)) {
-          auto single_choice = get<Menu::Single_choice>(choice);
+  sf::Music music;
+  music.openFromMemory(tetris_theme_ogg, tetris_theme_ogg_len);
+  music.play();
+  music.setLoop(true);
 
-          if (single_choice.name == "Play") {
-            state.name = State::Name::PLAYING;
-            accumulatedTime = 0.f;
-            clock.restart();
-          } else if (single_choice.name == "Quit") {
-            window.close();
-          } else {
-            std::cerr << "Received invalid choice: " << single_choice.name
-                      << std::endl;
-            throw std::invalid_argument("invalid choice");
-          }
+  Menu::T menu = Menu::init_main([&state, &window, &accumulatedTime,
+                                  &clock](Menu::Item choice, float speed) {
+    if (holds_alternative<Menu::Single_choice>(choice)) {
+      auto single_choice = get<Menu::Single_choice>(choice);
 
-        } else {
-          auto multiple_choice = get<Menu::Multiple_choice>(choice);
-          if (multiple_choice.name == "Speed") {
+      if (single_choice.name == "Restart") {
+        state = State::init();
+      }
 
-          } else {
-            std::cerr << "Received invalid choice: " << multiple_choice.name
-                      << std::endl;
-            throw std::invalid_argument("invalid choice");
-          }
-        }
-      });
+      if (single_choice.name == "Play" || single_choice.name == "Restart") {
+        state.name = State::Name::PLAYING;
+        state.speed = speed;
+        accumulatedTime = 0.f;
+        clock.restart();
+      } else if (single_choice.name == "Quit") {
+        window.close();
+      } else {
+        std::cerr << "Received invalid choice: " << single_choice.name
+                  << std::endl;
+        throw std::invalid_argument("invalid choice");
+      }
+
+    } else {
+      auto multiple_choice = get<Menu::Multiple_choice>(choice);
+      if (multiple_choice.name == "Speed") {
+        state.name = State::Name::PLAYING;
+        state.speed = speed;
+        accumulatedTime = 0.f;
+        clock.restart();
+      } else {
+        std::cerr << "Received invalid choice: " << multiple_choice.name
+                  << std::endl;
+        throw std::invalid_argument("invalid choice");
+      }
+    }
+  });
 
   while (window.isOpen()) {
     while (window.pollEvent(event)) {
@@ -94,7 +110,11 @@ int main() {
             state = State::manageKeyPressed(state, key, true);
           }
         } else if (state.name == State::Name::SHOWING_FIRST_MENU) {
-          if (key == sf::Keyboard::Down) {
+          if (key == sf::Keyboard::Escape) {
+            menu.selection = 0;
+            Menu::choose(menu);
+          } else if (key == sf::Keyboard::Down) {
+
             menu = Menu::selectDown(menu);
           } else if (key == sf::Keyboard::Up) {
             menu = Menu::selectUp(menu);

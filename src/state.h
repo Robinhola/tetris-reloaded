@@ -11,7 +11,6 @@ namespace State {
 
 enum Name {
   SHOWING_FIRST_MENU,
-  SHOWING_MENU,
   PLAYING,
   LOST,
   WON,
@@ -42,6 +41,7 @@ struct T {
   float accumulatedFramesBeforeUpdate = 0.0f;
 
   Name name = SHOWING_FIRST_MENU;
+  float speed = 1.0f;
 };
 
 T init();

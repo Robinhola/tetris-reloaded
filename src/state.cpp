@@ -3,6 +3,8 @@
 #include "grid.h"
 #include "keys.h"
 #include "piece.h"
+#include <algorithm>
+#include <iostream>
 #include <sfml/graphics.hpp>
 
 namespace State {
@@ -70,10 +72,7 @@ T move(T t, const sf::Vector2f &direction) {
 
 T moveLeft(T t) { return move(t, sf::Vector2f(-1, 0)); }
 T moveRight(T t) { return move(t, sf::Vector2f(1, 0)); }
-T moveDown(T t) {
-  t.accumulatedFramesBeforeFall = 0.0f;
-  return move(t, sf::Vector2f(0, 1));
-}
+T moveDown(T t) { return move(t, sf::Vector2f(0, 1)); }
 
 T withRemovedFullLines(T t) {
   auto &blocks = t.blocks.blocks;
@@ -153,6 +152,7 @@ T manageKeyPressed(T t, sf::Keyboard::Key key, bool wasJustPressed) {
   }
 
   if (key == sf::Keyboard::Down) {
+    t.accumulatedFramesBeforeFall = 0.f;
     return moveDown(t);
   }
 
@@ -160,6 +160,10 @@ T manageKeyPressed(T t, sf::Keyboard::Key key, bool wasJustPressed) {
 }
 
 T manageFixedStep(T t, Keys::T keys) {
+  float FramesBeforeFall = fixedNumberOfFrames / t.speed;
+  // If you keep the key pressed, it will move the piece 1.5f times per update
+  float FramesBeforeMovement = std::max(FramesBeforeFall / 2.f, 7.5f);
+
   t.accumulatedFramesBeforeMove += 1.0f;
   t.accumulatedFramesBeforeFall += 1.0f;
   t.accumulatedFramesBeforeUpdate += 1.0f;

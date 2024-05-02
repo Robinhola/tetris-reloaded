@@ -2,7 +2,6 @@
 #include "constants.h"
 #include "font.h"
 #include <SFML/Graphics.hpp>
-#include <cassert>
 #include <string>
 #include <variant>
 #include <vector>
@@ -11,7 +10,7 @@ using namespace std;
 
 namespace Menu {
 
-T init_main(function<void(Item choice)> handle_choice) {
+T init_main(function<void(Item choice, float speed)> handle_choice) {
 
   sf::RectangleShape background;
   background.setFillColor(sf::Color(252, 118, 109, 128));
@@ -22,11 +21,25 @@ T init_main(function<void(Item choice)> handle_choice) {
            0,
            {
                Menu::Single_choice{"Play"},
+               Menu::Single_choice{"Restart"},
                Menu::Multiple_choice{"Speed", 0, {"1", "2", "3"}},
                Menu::Single_choice{"Quit"},
            },
            handle_choice,
            background};
+}
+
+float getSpeed(T t) {
+  auto speed_choice = get<Multiple_choice>(t.items[2]);
+  auto selection = speed_choice.choices[speed_choice.selection];
+  if (selection == "1") {
+    return 2.f;
+  } else if (selection == "2") {
+    return 4.f;
+  } else if (selection == "3") {
+    return 6.f;
+  }
+  throw std::invalid_argument("invalid speed");
 }
 
 T selectVertical(T t, size_t offset) {
@@ -57,7 +70,7 @@ T selectDown(T t) { return selectVertical(t, +1); }
 T selectRight(T t) { return selectHorizontal(t, +1); }
 T selectLeft(T t) { return selectHorizontal(t, -1); }
 
-void choose(T t) { t.handle_choice(t.items[t.selection]); }
+void choose(T t) { t.handle_choice(t.items[t.selection], getSpeed(t)); }
 
 void setStyle(sf::Text &name, bool isSelected) {
   if (isSelected) {
