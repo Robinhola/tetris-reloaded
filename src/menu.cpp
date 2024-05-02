@@ -13,7 +13,7 @@ namespace Menu {
 T init_main(function<void(Item choice, float speed)> handle_choice) {
 
   sf::RectangleShape background;
-  background.setFillColor(sf::Color(252, 118, 109, 128));
+  background.setFillColor(sf::Color(252, 118, 109, 200));
   background.setSize(sf::Vector2(WINDOW_WIDTH * .8f, WINDOW_HEIGHT * .8f));
   background.setPosition(sf::Vector2(WINDOW_WIDTH * .1f, WINDOW_HEIGHT * .1f));
 
@@ -97,14 +97,14 @@ void draw(T t, sf::RenderWindow &window) {
   name.setFont(font); // font is a sf::Font
   name.setString(t.name);
   name.setCharacterSize(pixels); // in pixels, not points!
-  name.setFillColor(sf::Color::Magenta);
+  name.setFillColor(sf::Color::Blue);
   name.setPosition(t.background.getPosition());
 
   window.draw(name);
 
   for (int i = 0; i < t.items.size(); i++) {
     auto item = t.items[i];
-    float offset = (i + 1) * lineHeight;
+    float offset = (i + 2) * lineHeight;
 
     if (holds_alternative<Single_choice>(item)) {
       auto choice = get<Single_choice>(item);
